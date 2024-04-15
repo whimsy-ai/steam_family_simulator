@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'data.dart';
 import 'http.dart';
+import 'steam_game.dart';
 
 class SteamProfile {
   final String id;
@@ -11,7 +13,7 @@ class SteamProfile {
   bool mine;
   bool loadingInfo = false;
   bool loadingGames = false;
-  bool gamesVisible = true;
+  bool gamesVisible = false;
 
   SteamProfile({
     required this.id,
@@ -40,7 +42,6 @@ class SteamProfile {
   Future<void> loadGames() async {
     if (loadingGames) return;
     loadingGames = true;
-    gamesVisible = true;
     games.clear();
 
     final res = await Http.get<String>(
@@ -52,45 +53,26 @@ class SteamProfile {
         final list = data['games'] as Iterable<dynamic>;
         for (var item in list) {
           final game = SteamGame.fromJson(item);
+          if (Data.gameCaches.containsKey(game.id)) {
+            games[game.id] = Data.gameCaches[game.id]!;
+          }
           games[game.id] = game;
         }
       }
     }
     loadingGames = false;
   }
-}
-
-class SteamGame {
-  final String id;
-  final String name;
-  final String imgHash;
-
-  SteamGame({
-    required this.id,
-    required this.name,
-    required this.imgHash,
-  });
-
-  String get avatar =>
-      'http://media.steampowered.com/steamcommunity/public/images/apps/$id/$imgHash.jpg';
-
-  factory SteamGame.fromJson(Map<String, dynamic> map) => SteamGame(
-        id: map['appid'].toString(),
-        name: map['name'],
-        imgHash: map['img_icon_url'],
-      );
-
-  factory SteamGame.fromString(String source) {
-    final data = jsonDecode(source);
-    return SteamGame(
-        id: data[0],
-        name: data[1],
-        imgHash: data[2],
-      );
-  }
 
   @override
-  String toString() => jsonEncode([id, name, imgHash]);
+  toString() => jsonEncode([id, name, avatar, profileUrl]);
 
-
+  factory SteamProfile.fromString(String source) {
+    final data = jsonDecode(source);
+    return SteamProfile(
+      id: data[0],
+      name: data[1],
+      avatar: data[2],
+      profileUrl: data[3],
+    );
+  }
 }

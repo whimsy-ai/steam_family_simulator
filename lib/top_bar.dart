@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:steam_family_simulator/main_controller.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:window_manager/window_manager.dart';
 
 class TopBar extends GetView<MainController> {
@@ -48,7 +49,10 @@ class TopBar extends GetView<MainController> {
 
               /// Github
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  launchUrlString(
+                      'https://github.com/whimsy-ai/steam_family_simulator');
+                },
                 child: Container(
                   height: double.infinity,
                   padding: EdgeInsets.symmetric(horizontal: 10),

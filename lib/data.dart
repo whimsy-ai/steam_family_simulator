@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'steam_game.dart';
 import 'steam_profile.dart';
 
 const _proxyKey = 'proxy';
@@ -11,11 +12,13 @@ const _accountsKey = 'account';
 const _themeKey = 'theme';
 const _gamesKey = 'games';
 const _localeKey = 'locale';
+const _gameCacheKey = 'game_cache';
+const _profileCacheKey = 'profile_cache';
 
 class Data {
   static late SharedPreferences _core;
 
-  static Future<void> init() async {
+  static Future<void> init([bool test = false]) async {
     _core = await SharedPreferences.getInstance();
     _proxy = _core.getString(_proxyKey);
     _darkTheme = _core.getBool(_themeKey) ?? true;
@@ -30,14 +33,22 @@ class Data {
           _accountsKey, v.map((e) => jsonEncode(e.toJson())).toList());
     });
 
+    followingGames = RxSet();
     if (_core.containsKey(_gamesKey)) {
-      final list = _core.getStringList(_gamesKey)!.map(SteamGame.fromString);
-      followingGames.addAll({for (var d in list) d.id: d});
+      followingGames.addAll(_core.getStringList(_gamesKey)!);
     }
     followingGames.listen((v) {
-      _core.setStringList(
-          _gamesKey, v.values.map((e) => e.toString()).toList());
+      _core.setStringList(_gamesKey, followingGames.toList());
     });
+
+    gameCaches = RxMap();
+    if (_core.containsKey(_gameCacheKey)) {
+      final list =
+          _core.getStringList(_gameCacheKey)!.map(SteamGame.fromString);
+      gameCaches.addAll(Map.fromEntries(list.map((e) => MapEntry(e.id, e))));
+      print('加载游戏缓存 ${gameCaches.length} 个');
+    }
+    gameCaches.listen(saveGameCaches);
   }
 
   static String? _proxy;
@@ -64,7 +75,7 @@ class Data {
     _core.setBool(_themeKey, value);
   }
 
-  static final RxMap<String, SteamGame> followingGames = RxMap();
+  static late final RxSet<String> followingGames;
 
   static Locale get locale {
     final locale = _core.getString(_localeKey);
@@ -76,9 +87,17 @@ class Data {
         ) {
       return Locale(locale);
     }
-    return Get.deviceLocale!;
+    return PlatformDispatcher.instance.locale;
   }
 
   static set locale(Locale locale) =>
       _core.setString(_localeKey, locale.toString());
+
+  static late RxMap<String, SteamGame> gameCaches;
+
+  static saveGameCaches([Map<String, SteamGame>? data]) {
+    data ??= gameCaches;
+    _core.setStringList(
+        _gameCacheKey, data.keys.map((key) => data![key]!.toString()).toList());
+  }
 }

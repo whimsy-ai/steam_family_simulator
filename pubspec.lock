@@ -69,10 +69,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "0978e9a3e45305a80a7210dbeaf79d6ee8bee33f70c8e542dc654c952070217f"
+      sha256: "639179e1cc0957779e10dd5b786ce180c477c4c0aca5aaba5d1700fa2e834801"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.2+1"
+    version: "5.4.3"
   dynamic_color:
     dependency: "direct main"
     description:
@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.7.0"
+  dynamic_parallel_queue:
+    dependency: "direct main"
+    description:
+      name: dynamic_parallel_queue
+      sha256: "2887ebe5dbd4481e57d81320edddc1851fdbcc1b63413a4bebd4a568c6b3087e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3+2"
   fake_async:
     dependency: transitive
     description:

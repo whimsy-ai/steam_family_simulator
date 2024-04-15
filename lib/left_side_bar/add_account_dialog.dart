@@ -88,9 +88,9 @@ class AddAccountDialog extends StatelessWidget {
                     try {
                       final id = await _getSteamIdFromUrl(controller.text);
                       if (id != null) {
-                        final list = await Http.loadProfiles([id]);
-                        list?.first.mine = mine.value;
-                        Get.back(result: list?.first);
+                        final acc = await Http.loadProfile(id);
+                        acc?.mine = mine.value;
+                        Get.back(result: acc);
                       }
                     } catch (e) {}
                     loading.value = false;

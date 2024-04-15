@@ -146,7 +146,7 @@ class MyHomePage extends StatelessWidget {
                         return GetPageRoute(
                           settings: settings,
                           transitionDuration: Duration.zero,
-                          page: () => GameCompareView(),
+                          page: () => GameCompareView<MainController>(),
                         );
                       } else if (settings.name == '/settings') {
                         return GetPageRoute(
@@ -164,6 +164,19 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
       ),
+      // floatingActionButton: Wrap(
+      //   children: [
+      //     FloatingActionButton(
+      //       child: Text('test'),
+      //       onPressed: () async {
+      //         assert((await Http.loadGame(2550370, Locale('en'))).name ==
+      //             'Find Up!');
+      //         assert((await Http.loadGame(2550370, Locale('zh', 'TW'))).name ==
+      //             '找起来！');
+      //       },
+      //     ),
+      //   ],
+      // ),
     );
   }
 }

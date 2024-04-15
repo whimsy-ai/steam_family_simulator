@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:steam_family_simulator/game_compare/my_table.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'dart:math' as math;
 
 import '../compare_controller.dart';
 import '../data.dart';
 import '../main_controller.dart';
 import '../my_chip.dart';
+import '../steam_game.dart';
 import '../steam_profile.dart';
 
-class GameCompareView extends GetView<MainController> {
+class GameCompareView<T extends MainController> extends GetView<T> {
+  final LinkedScrollControllerGroup verticalScrolls =
+      LinkedScrollControllerGroup();
+
+  final RxBool _show = false.obs;
+
+  GameCompareView({super.key}) {
+    verticalScrolls.addOffsetChangedListener(_changed);
+  }
+
+  _changed() {
+    _show.value = verticalScrolls.offset > 100;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,116 +35,112 @@ class GameCompareView extends GetView<MainController> {
         padding: EdgeInsets.all(8.0),
         child: Card(
           clipBehavior: Clip.antiAlias,
-          child: GetBuilder<MainController>(
+          child: GetBuilder<T>(
               id: 'content',
               builder: (c) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 10,
-                                children: [
-                                  Text('游戏过滤器'),
-                                  MyChip(
-                                    label: '全部',
-                                    selected:
-                                        controller.mode == DisplayMode.all,
-                                    onChanged: (v) {
-                                      controller.mode = DisplayMode.all;
-                                    },
-                                  ),
-                                  MyChip(
-                                      label: '我没有的游戏',
-                                      selected:
-                                          controller.mode == DisplayMode.notOwn,
-                                      onSelect: () {
-                                        final mine = controller.selected
-                                            .firstWhereOrNull(
-                                                (acc) => acc.mine);
-                                        if (mine == null) {
-                                          showToast('请添加主账号');
-                                        }
-                                        return mine != null;
-                                      },
-                                      onChanged: (v) {
-                                        controller.mode = controller.mode ==
-                                                DisplayMode.notOwn
-                                            ? DisplayMode.all
-                                            : DisplayMode.notOwn;
-                                      }),
-                                  Obx(
-                                    () => MyChip(
-                                        label:
-                                            '想要的游戏(${Data.followingGames.length})',
-                                        selected: controller.mode ==
-                                            DisplayMode.following,
-                                        onSelect: () => true,
-                                        onChanged: (v) {
-                                          controller.mode =
-                                              DisplayMode.following;
-                                        }),
-                                  ),
-                                  SizedBox(
-                                    width: 150,
-                                    height: kToolbarHeight,
-                                    child: TextFormField(
-                                      initialValue: controller.search,
-                                      onChanged: (v) => controller.search = v,
-                                      decoration: InputDecoration(
-                                        alignLabelWithHint: true,
-                                        floatingLabelAlignment:
-                                            FloatingLabelAlignment.start,
-                                        prefixIcon:
-                                            Icon(Icons.search, size: 14),
-                                        hintText: '关键字',
-                                        label: Text('搜索'),
-                                        contentPadding: EdgeInsets.zero,
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton.outlined(
-                              onPressed: () {
-                                controller.layout =
-                                    controller.layout == Layout.list
-                                        ? Layout.grid
-                                        : Layout.list;
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 10,
+                        children: [
+                          Text('游戏过滤器'),
+                          MyChip(
+                            label: '全部',
+                            selected: controller.mode == DisplayMode.all,
+                            onChanged: (v) {
+                              controller.mode = DisplayMode.all;
+                            },
+                          ),
+                          MyChip(
+                              label: '我没有的游戏',
+                              selected:
+                                  controller.mode == DisplayMode.notOwn,
+                              onSelect: () {
+                                final mine = controller.selected
+                                    .firstWhereOrNull((acc) => acc.mine);
+                                if (mine == null) {
+                                  showToast('请添加主账号');
+                                }
+                                return mine != null;
                               },
-                              icon: Icon(
-                                controller.layout == Layout.list
-                                    ? Icons.apps_rounded
-                                    : Icons.format_list_bulleted_rounded,
+                              onChanged: (v) {
+                                controller.mode =
+                                    controller.mode == DisplayMode.notOwn
+                                        ? DisplayMode.all
+                                        : DisplayMode.notOwn;
+                              }),
+                          Obx(
+                            () => MyChip(
+                                label:
+                                    '想要的游戏(${Data.followingGames.length})',
+                                selected: controller.mode ==
+                                    DisplayMode.following,
+                                onSelect: () => true,
+                                onChanged: (v) {
+                                  controller.mode = DisplayMode.following;
+                                }),
+                          ),
+                          SizedBox(
+                            width: 300,
+                            height: kToolbarHeight,
+                            child: TextFormField(
+                              initialValue: controller.search,
+                              onChanged: (v) => controller.search = v,
+                              decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                floatingLabelAlignment:
+                                    FloatingLabelAlignment.start,
+                                prefixIcon: Icon(Icons.search, size: 14),
+                                hintText: '关键字',
+                                label: Text('搜索'),
+                                contentPadding: EdgeInsets.zero,
+                                border: OutlineInputBorder(),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      Expanded(child: _table(context)),
-                    ],
-                  )),
+                    ),
+                    Expanded(child: _table(context)),
+                  ],
+                )),
+        ),
+      ),
+      floatingActionButton: Obx(
+        () => AnimatedOpacity(
+          opacity: _show.value ? 1 : 0,
+          duration: Duration(milliseconds: 200),
+          child: FloatingActionButton(
+              child: Icon(Icons.vertical_align_top),
+              onPressed: () {
+                verticalScrolls.jumpTo(0);
+              }),
         ),
       ),
     );
   }
 
+  static const double columnMinWidth = 200;
+  static const double firstColumnWidth = 200;
+
   Widget _table(BuildContext context) {
     final keys = controller.games.keys.toList();
     return LayoutBuilder(builder: (context, constrains) {
       final maxWidth = constrains.maxWidth;
-      final realWidth = controller.selected.length * 260 + 200;
-      double gameColumnWidth = realWidth >= maxWidth
-          ? 200
-          : maxWidth / (controller.selected.length + 1);
-      print('max:$maxWidth  real:$realWidth, final $gameColumnWidth');
+
+      /// 计算真正的列宽
+      /// 包括每列的分割线(1像素）
+      double gameColumnWidth = math.max(
+        columnMinWidth,
+        (maxWidth - firstColumnWidth) / controller.selected.length -
+            (controller.selected.length - 1),
+      );
+      print('max:$maxWidth  final $gameColumnWidth');
       return MyTable(
+        verticalScrolls: verticalScrolls,
         headerColor: Theme.of(context).secondaryHeaderColor,
         firstColumnColor: Theme.of(context).secondaryHeaderColor,
         leftTopWidgetBuilder: (c, w, h) => CustomPaint(
@@ -139,10 +151,12 @@ class GameCompareView extends GetView<MainController> {
           ),
           size: Size(w, h),
         ),
-        rowCount: controller.games.length,
-        headerHeight: 50,
-        columnCount: controller.selected.length,
+        rowHeight: 50,
+        headerHeight: 70,
+        firstColumnWidth: firstColumnWidth,
         columnWidth: gameColumnWidth,
+        rowCount: controller.games.length,
+        columnCount: controller.selected.length,
 
         /// 账号名
         headerCellBuilder: (c, column) {
@@ -164,30 +178,53 @@ class GameCompareView extends GetView<MainController> {
   }
 
   Widget _accountName(SteamProfile account) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (!account.gamesVisible)
-          Tooltip(
-            message: '没有公开游戏库',
-            child: Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.amber,
+    final gamesVisible = account.gamesVisible;
+    Widget child = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 15,
+            backgroundImage: NetworkImage(account.avatar),
+          ),
+          SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              account.name,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-        CircleAvatar(
-          backgroundImage: NetworkImage(account.avatar),
-          radius: 10,
-        ),
-        Flexible(
-          child: Text(
-            account.name,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Text('(${account.games.length})'),
-      ],
+          SizedBox(width: 4),
+          if (gamesVisible) Text('(${account.games.length})'),
+          if (account.loadingGames == false && gamesVisible == false)
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.redAccent,
+            ),
+          if (controller.sorted == account)
+            Icon(
+              controller.ascending
+                  ? Icons.arrow_drop_up_rounded
+                  : Icons.arrow_drop_down_rounded,
+            ),
+        ],
+      ),
     );
+    if (gamesVisible) {
+      child = InkWell(
+        child: child,
+        onTap: () {
+          controller.sort(account);
+        },
+      );
+    } else {
+      child = Tooltip(
+        message: '没有公开游戏信息',
+        child: child,
+      );
+    }
+    return child;
   }
 
   Widget _gameName(SteamGame game) {
@@ -197,45 +234,61 @@ class GameCompareView extends GetView<MainController> {
       richMessage: TextSpan(children: [
         TextSpan(children: [
           WidgetSpan(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Wrap(
+              spacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              // mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  child: Text('在浏览器打开'),
+                  child: Text('打开'),
                   onPressed: () {
                     launchUrlString(
                         'https://store.steampowered.com/app/${game.id}');
                   },
                 ),
-                IconButton(
-                  icon: Icon(FontAwesomeIcons.heart),
-                  onPressed: () {
-                    Data.followingGames[game.id] = game;
-                  },
-                ),
+                Obx(() {
+                  final contains = Data.followingGames.contains(game.id);
+                  return IconButton(
+                    icon: Icon(
+                      contains ? Icons.heart_broken : FontAwesomeIcons.heart,
+                      color: contains ? Colors.red : null,
+                    ),
+                    onPressed: () {
+                      if (contains) {
+                        Data.followingGames.remove(game.id);
+                      } else {
+                        Data.followingGames.add(game.id);
+                      }
+                      if (controller.mode == DisplayMode.following) {
+                        controller.updateGames();
+                      }
+                    },
+                  );
+                }),
               ],
             ),
           ),
         ]),
       ]),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.network(
-            game.avatar,
-            errorBuilder: (BuildContext context, _, __) {
-              return SizedBox.shrink();
-            },
-          ),
-          SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              game.name,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 14),
+      child: Padding(
+        padding: EdgeInsets.all(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.network(
+              game.avatar,
+              errorBuilder: (BuildContext context, _, __) => SizedBox.shrink(),
             ),
-          ),
-        ],
+            SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                game.name,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

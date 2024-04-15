@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:get/get.dart';
-import 'package:steam_family_simulator/data.dart';
 
-import 'main_controller.dart';
+import 'data.dart';
+import 'http.dart';
+import 'steam_game.dart';
 import 'steam_profile.dart';
 
 enum DisplayMode {
@@ -20,8 +21,7 @@ mixin GameFilterController on GetxController {
 
   set mode(DisplayMode value) {
     _mode = value;
-    _allGames();
-    update(['content']);
+    updateGames();
   }
 
   String? _search;
@@ -33,15 +33,13 @@ mixin GameFilterController on GetxController {
     _search = value;
     _searchTimer?.cancel();
     _searchTimer = Timer(Duration(milliseconds: 200), () {
-      _allGames();
-      update(['content']);
+      updateGames();
     });
   }
 
   bool isSelected(SteamProfile v) => selected.contains(v);
 
   void select(SteamProfile v) {
-    MainController main = (this as MainController);
     if (selected.contains(v)) {
       if (_sorted == v) _sorted = null;
       selected.remove(v);
@@ -56,8 +54,11 @@ mixin GameFilterController on GetxController {
         selected.add(v);
       }
       update(['content']);
-      v.loadGames().then((value) {
+      v.loadGames().then((_) {
         _allGames();
+        update(['content']);
+        return Http.loadGames(v, Data.locale);
+      }).then((_) {
         update(['content']);
       });
     }
@@ -84,24 +85,28 @@ mixin GameFilterController on GetxController {
       if (acc == _sorted) continue;
       _games.addAll(acc.games);
     }
+
+    /// 排序
     if (_sorted != null) {
-      final copy = Map<String, SteamGame>.from(_games);
       var keys = _sorted!.games.keys.toSet();
-      print('copy ${copy.length}, keys ${keys.length}');
-      _games.clear();
+      // print('copy ${_games.length}, keys ${keys.length}');
       if (ascending) {
-        keys = copy.keys.toSet().difference(keys);
+        keys = _games.keys.toSet().difference(keys);
       } else {
         // keys = keys.intersection(copy.keys.toSet());
       }
-      print('keys1 $keys');
+      // print('keys1 $keys');
       keys.addAll(_sorted!.games.keys);
-      keys.addAll(copy.keys);
+      keys.addAll(_games.keys);
+      final copy = Map.from(_games);
+      _games.clear();
       for (var key in keys) {
         _games[key] = (_sorted!.games[key] ?? copy[key])!;
       }
-      print('keys2 ${_games.keys}');
+      // print('keys2 ${_games.keys}');
     }
+
+    /// 显示模式
     if (mode == DisplayMode.notOwn) {
       final ownGameKeys = selected
           .where((element) => element.mine)
@@ -110,24 +115,34 @@ mixin GameFilterController on GetxController {
           .toSet();
       _games.removeWhere((key, value) => ownGameKeys.contains(key));
     } else if (mode == DisplayMode.following) {
-      print('排首位 ${Data.followingGames.values.map((e) => e.name)}');
-      final copy = Map<String, SteamGame>.from(_games);
+      print('排首位 ${Data.followingGames}');
       _games
         ..clear()
-        ..addAll(Map.from(Data.followingGames))
-        ..addAll(copy);
+        ..addAll({for (var k in Data.followingGames) k: Data.gameCaches[k]!});
     }
+
+    /// 搜索
     if (_search != null) {
-      _games.removeWhere((key, value) => !value.name.contains(_search!));
+      _games.removeWhere((key, value) =>
+          !value.name.toLowerCase().contains(_search!.toLowerCase()));
     }
   }
 
-  int? get sortedIndex => _sorted == null ? null : selected.indexOf(_sorted!);
+  SteamProfile? get sorted => _sorted;
 
-  void sort(int accountIndex, bool ascending) {
-    _sorted = selected[accountIndex - 1];
+  void sort(SteamProfile account) {
+    if (selected.contains(account) == false) return;
+    if (_sorted == account) {
+      ascending = !ascending;
+    } else {
+      ascending = true;
+    }
+    _sorted = account;
     print('sort ${_sorted!.name} $ascending');
-    this.ascending = ascending;
+    updateGames();
+  }
+
+  void updateGames() {
     _allGames();
     update(['content']);
   }
