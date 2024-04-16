@@ -62,10 +62,13 @@ class Http {
       final data = res.data!['data'][id.toString()]['common'] as Map;
       final name = data['name_localized']?[localeToSteamLanguages(locale)] ??
           data['name'];
+      final exfgls = data['exfgls'] == '1';
+      print('家庭共享 $name $exfgls');
       return SteamGame(
         id: id.toString(),
         name: name,
         imgHash: data['icon'] ?? '',
+        exfgls: exfgls,
       );
     } catch (e) {
       return null;

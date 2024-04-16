@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-import 'compare_controller.dart';
+import 'game_compare/compare_controller.dart';
 import 'data.dart';
 import 'steam_profile.dart';
 

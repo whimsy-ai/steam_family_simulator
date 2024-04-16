@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 
-import 'data.dart';
-import 'http.dart';
-import 'steam_game.dart';
-import 'steam_profile.dart';
+import '../data.dart';
+import '../http.dart';
+import '../steam_game.dart';
+import '../steam_profile.dart';
 
 enum DisplayMode {
   all,
@@ -27,6 +27,16 @@ mixin GameFilterController on GetxController {
   String? _search;
   Timer? _searchTimer;
 
+  /// 隐藏不允许家庭共享的游戏
+  bool _showExfgls = false;
+
+  bool get showExfgls => _showExfgls;
+
+  set showExfgls(bool value) {
+    _showExfgls = value;
+    updateGames();
+  }
+
   String? get search => _search;
 
   set search(String? value) {
@@ -44,7 +54,7 @@ mixin GameFilterController on GetxController {
       if (_sorted == v) _sorted = null;
       selected.remove(v);
       if (!hasMineAccount) _mode = DisplayMode.all;
-      _allGames();
+      _apply();
       Get.offAllNamed('/content', id: 1);
       update(['content']);
     } else {
@@ -55,7 +65,7 @@ mixin GameFilterController on GetxController {
       }
       update(['content']);
       v.loadGames().then((_) {
-        _allGames();
+        _apply();
         update(['content']);
         return Http.loadGames(v, Data.locale);
       }).then((_) {
@@ -67,7 +77,7 @@ mixin GameFilterController on GetxController {
     } else {
       Get.offAllNamed('/content', id: 1);
     }
-    update(['sideBar']);
+    update(['sideBar', 'content']);
   }
 
   bool get hasMineAccount => selected.any((element) => element.mine);
@@ -79,52 +89,65 @@ mixin GameFilterController on GetxController {
   SteamProfile? _sorted;
   bool ascending = true;
 
-  void _allGames() {
+  void _apply() {
     _games.clear();
     for (var acc in selected) {
-      if (acc == _sorted) continue;
       _games.addAll(acc.games);
     }
 
-    /// 排序
-    if (_sorted != null) {
-      var keys = _sorted!.games.keys.toSet();
-      // print('copy ${_games.length}, keys ${keys.length}');
-      if (ascending) {
-        keys = _games.keys.toSet().difference(keys);
-      } else {
-        // keys = keys.intersection(copy.keys.toSet());
-      }
-      // print('keys1 $keys');
-      keys.addAll(_sorted!.games.keys);
-      keys.addAll(_games.keys);
-      final copy = Map.from(_games);
-      _games.clear();
-      for (var key in keys) {
-        _games[key] = (_sorted!.games[key] ?? copy[key])!;
-      }
-      // print('keys2 ${_games.keys}');
-    }
+    Set<String> keys;
 
     /// 显示模式
     if (mode == DisplayMode.notOwn) {
-      final ownGameKeys = selected
+      keys = _games.keys.toSet().difference(selected
           .where((element) => element.mine)
           .map((e) => e.games.keys)
           .expand((element) => element)
-          .toSet();
-      _games.removeWhere((key, value) => ownGameKeys.contains(key));
+          .toSet());
     } else if (mode == DisplayMode.following) {
       print('排首位 ${Data.followingGames}');
-      _games
-        ..clear()
-        ..addAll({for (var k in Data.followingGames) k: Data.gameCaches[k]!});
+      keys = Data.followingGames.keys.toSet();
+    } else {
+      keys = _games.keys.toSet();
+    }
+    print('显示器模式 ${keys.length}');
+
+    /// 排序
+    if (selected.length > 1 && _sorted != null) {
+      print('sort ${_sorted!.name} $ascending');
+      // print('copy ${_games.length}, keys ${keys.length}');
+      final copy = <String>{};
+      Set<String> other = _sorted!.games.keys.toSet().intersection(keys);
+      print('重复 ${other.length}');
+      if (ascending) {
+        copy.addAll(other);
+        copy.addAll(keys);
+      } else {
+        copy.addAll(keys.difference(other));
+        copy.addAll(other);
+      }
+      keys = copy;
+      // print('keys1 $keys');
+      // keys.addAll(_sorted!.games.keys);
+      // keys.addAll(_games.keys);
+      // print('keys2 ${_games.keys}');
+    }
+    print('排序 ${keys.length}');
+    final copy = Map.from(_games);
+    _games.clear();
+    for (var key in keys) {
+      _games[key] =
+          Data.followingGames[key] ?? Data.gameCaches[key] ?? copy[key];
     }
 
     /// 搜索
     if (_search != null) {
       _games.removeWhere((key, value) =>
           !value.name.toLowerCase().contains(_search!.toLowerCase()));
+    }
+
+    if (showExfgls == false) {
+      _games.removeWhere((k, v) => v.exfgls);
     }
   }
 
@@ -138,12 +161,11 @@ mixin GameFilterController on GetxController {
       ascending = true;
     }
     _sorted = account;
-    print('sort ${_sorted!.name} $ascending');
     updateGames();
   }
 
   void updateGames() {
-    _allGames();
+    _apply();
     update(['content']);
   }
 }

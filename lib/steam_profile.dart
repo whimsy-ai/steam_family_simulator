@@ -14,6 +14,7 @@ class SteamProfile {
   bool loadingInfo = false;
   bool loadingGames = false;
   bool gamesVisible = false;
+  String? loadError;
 
   SteamProfile({
     required this.id,
@@ -41,12 +42,14 @@ class SteamProfile {
 
   Future<void> loadGames() async {
     if (loadingGames) return;
+    gamesVisible = false;
+    loadError = null;
     loadingGames = true;
     games.clear();
 
-    final res = await Http.get<String>(
-        'https://steam.gzlock88.workers.dev/games?id=$id');
-    if (res.statusCode == 200) {
+    try {
+      final res = await Http.get<String>(
+          'https://steam.gzlock88.workers.dev/games?id=$id');
       final data = jsonDecode(res.data!)['response'] as Map<String, dynamic>;
       gamesVisible = data.containsKey('games');
       if (gamesVisible) {
@@ -59,6 +62,8 @@ class SteamProfile {
           games[game.id] = game;
         }
       }
+    } catch (e) {
+      loadError = e.toString();
     }
     loadingGames = false;
   }

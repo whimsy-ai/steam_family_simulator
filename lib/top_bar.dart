@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:steam_family_simulator/main_controller.dart';
+import 'package:ui/ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'main.dart';
 
 class TopBar extends GetView<MainController> {
   final double iconSize;
@@ -26,7 +29,7 @@ class TopBar extends GetView<MainController> {
               },
               child: Padding(
                 padding: EdgeInsets.all(8),
-                child: Text('Steam家庭模拟器'),
+                child: Text('${UI.s_f_s.tr} v${packageInfo!.version}'),
               ),
             ),
           ),
@@ -51,7 +54,8 @@ class TopBar extends GetView<MainController> {
               InkWell(
                 onTap: () {
                   launchUrlString(
-                      'https://github.com/whimsy-ai/steam_family_simulator');
+                    'https://github.com/whimsy-ai/steam_family_simulator',
+                  );
                 },
                 child: Container(
                   height: double.infinity,

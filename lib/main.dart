@@ -1,23 +1,28 @@
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:ui/ui.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
 
 import 'data.dart';
-import 'fast_settings.dart';
 import 'game_compare/game_compare_view.dart';
+import 'home_widget.dart';
 import 'http.dart';
 import 'left_side_bar/left_side_bar.dart';
 import 'main_controller.dart';
 import 'settings.dart';
 import 'steam_profile.dart';
 import 'top_bar.dart';
+import 'update_window_title.dart';
 
+PackageInfo? packageInfo;
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   print('缓存目录 ${(await getApplicationCacheDirectory()).path}');
@@ -27,7 +32,7 @@ void main(List<String> args) async {
   await hotKeyManager.unregisterAll();
   await WindowsSingleInstance.ensureSingleInstance(
     args,
-    "gzlock.steam_family_simulator",
+    'gzlock.steam_family_simulator',
   );
 
   await windowManager.ensureInitialized();
@@ -35,7 +40,6 @@ void main(List<String> args) async {
     minimumSize: Size(800, 600),
     center: true,
     skipTaskbar: false,
-    title: 'Steam家庭模拟器',
     titleBarStyle: TitleBarStyle.hidden,
   );
   // todo
@@ -43,8 +47,9 @@ void main(List<String> args) async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
-    // updateWindowTitle();
+    updateWindowTitle();
   });
+  packageInfo ??= await PackageInfo.fromPlatform();
 
   runApp(MyApp());
 }
@@ -64,6 +69,14 @@ class _MyAppState extends State<MyApp> {
     brightness: Brightness.dark,
   );
 
+  static final _tooltipTheme = TooltipThemeData(
+    decoration: BoxDecoration(color: Colors.black45.withOpacity(0.5)), // 背景颜色
+    textStyle: TextStyle(
+      color: Colors.white, // 这里设置Tooltip文本颜色
+      fontSize: 16.0,
+    ),
+  );
+
   bool _dark = Data.darkTheme;
 
   _themeChange(bool value) {
@@ -77,6 +90,12 @@ class _MyAppState extends State<MyApp> {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
       return OKToast(
         child: GetMaterialApp(
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          translations: UI(),
           locale: Data.locale,
           fallbackLocale: Locale('en'),
           debugShowCheckedModeBanner: false,
@@ -86,6 +105,7 @@ class _MyAppState extends State<MyApp> {
             inputDecorationTheme: InputDecorationTheme(
               border: OutlineInputBorder(),
             ),
+            tooltipTheme: _tooltipTheme,
           ).useSystemChineseFont(Brightness.light),
           darkTheme: ThemeData(
             useMaterial3: true,
@@ -93,6 +113,7 @@ class _MyAppState extends State<MyApp> {
             inputDecorationTheme: InputDecorationTheme(
               border: OutlineInputBorder(),
             ),
+            tooltipTheme: _tooltipTheme,
           ).useSystemChineseFont(Brightness.dark),
           initialRoute: '/main',
           transitionDuration: Duration.zero,
@@ -164,19 +185,6 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
       ),
-      // floatingActionButton: Wrap(
-      //   children: [
-      //     FloatingActionButton(
-      //       child: Text('test'),
-      //       onPressed: () async {
-      //         assert((await Http.loadGame(2550370, Locale('en'))).name ==
-      //             'Find Up!');
-      //         assert((await Http.loadGame(2550370, Locale('zh', 'TW'))).name ==
-      //             '找起来！');
-      //       },
-      //     ),
-      //   ],
-      // ),
     );
   }
 }

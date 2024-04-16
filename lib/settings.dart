@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ui/ui.dart';
 
+import 'change_language_tile.dart';
 import 'data.dart';
 import 'http.dart';
 import 'main_controller.dart';
@@ -15,42 +17,42 @@ class Settings extends GetView<MainController> {
     final c = TextEditingController(text: Data.proxy);
     return Scaffold(
       appBar: AppBar(
-        title: Text('设置'),
+        title: Text(UI.settings.tr),
       ),
-      body: Center(
-        child: SizedBox(
-          width: 300,
-          child: Card(
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  ListTile(
-                    title: TextField(
-                      controller: c,
-                      decoration: InputDecoration(
-                        labelText: '网络代理',
-                        prefixText: 'http://',
-                        suffix: IconButton(
-                          iconSize: 14,
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            Data.proxy = null;
-                          },
-                        ),
+      body: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              children: [
+                ChangeLanguageTile(),
+                ListTile(
+                  title: TextField(
+                    controller: c,
+                    decoration: InputDecoration(
+                      labelText: UI.proxy.tr,
+                      prefixText: 'http://',
+                      suffix: IconButton(
+                        iconSize: 14,
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          c.text = '';
+                          Data.proxy = null;
+                        },
                       ),
-                      onChanged: (v) {
-                        _lazyTimer?.cancel();
-                        _lazyTimer = Timer(Duration(milliseconds: 200), () {
-                          print('设置代理 $v');
-                          Data.proxy = v.isEmpty ? null : v;
-                          Http.init(proxy: v);
-                        });
-                      },
                     ),
+                    onChanged: (v) {
+                      _lazyTimer?.cancel();
+                      _lazyTimer = Timer(Duration(milliseconds: 200), () {
+                        print('设置代理 $v');
+                        Data.proxy = v.isEmpty ? null : v;
+                        Http.init(proxy: v);
+                      });
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
