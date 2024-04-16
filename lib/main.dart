@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
   );
 
   static final _tooltipTheme = TooltipThemeData(
-    decoration: BoxDecoration(color: Colors.black45.withOpacity(0.5)), // 背景颜色
+    decoration: BoxDecoration(color: Colors.black45.withOpacity(1)), // 背景颜色
     textStyle: TextStyle(
       color: Colors.white, // 这里设置Tooltip文本颜色
       fontSize: 16.0,

@@ -23,17 +23,23 @@ class FastSettings extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ChangeLanguageTile(),
+                  Divider(),
                   ListTile(
-                    title: Text('其他作品'),
+                    title: Text(UI.other_applications.tr),
                   ),
-                  ListTile(
-                    title: Text(UI.find_up.tr),
-                    subtitle: Text('鄙人开发的小游戏'),
-                    onTap: () {
-                      launchUrlString(
-                          'steam://openurl/https://store.steampowered.com/app/2550370');
-                    },
-                    trailing: Icon(FontAwesomeIcons.squareSteam),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.0),
+                    child: ListTile(
+                      leading: Icon(FontAwesomeIcons.squareSteam),
+                      title: Text(UI.find_up.tr),
+                      subtitle: Data.locale.languageCode == 'zh'
+                          ? Text('鄙人开发的小游戏')
+                          : null,
+                      onTap: () async {
+                        launchUrlString(
+                            'https://store.steampowered.com/app/2550370');
+                      },
+                    ),
                   ),
                   ListTile(
                     title: Text(UI.feed.tr),

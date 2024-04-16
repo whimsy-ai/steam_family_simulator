@@ -97,8 +97,8 @@ class GameCompareView<T extends MainController> extends GetView<T> {
                                   floatingLabelAlignment:
                                       FloatingLabelAlignment.start,
                                   prefixIcon: Icon(Icons.search, size: 14),
-                                  hintText: '关键字',
-                                  label: Text('搜索'),
+                                  hintText: UI.input_something.tr,
+                                  label: Text(UI.search.tr),
                                   contentPadding: EdgeInsets.zero,
                                   border: OutlineInputBorder(),
                                 ),
@@ -153,13 +153,12 @@ class GameCompareView<T extends MainController> extends GetView<T> {
         verticalScrolls: verticalScrolls,
         headerColor: Theme.of(context).secondaryHeaderColor,
         firstColumnColor: Theme.of(context).secondaryHeaderColor,
-        leftTopWidgetBuilder: (c, w, h) => CustomPaint(
+        leftTopWidgetBuilder: (c) => CustomPaint(
           painter: _Painter(
             color: Theme.of(c).dividerColor,
             accountLength: controller.selected.length,
             gameLength: keys.length,
           ),
-          size: Size(w, h),
         ),
         rowHeight: 50,
         headerHeight: 70,
@@ -236,11 +235,11 @@ class GameCompareView<T extends MainController> extends GetView<T> {
     {
       String? msg;
       if (account.loadingGames) {
-        msg = '正在读取数据';
+        msg = UI.loading_games.tr;
       } else if (account.loadError != null) {
         msg = account.loadError!;
       } else if (gamesVisible == false) {
-        msg = '没有公开游戏信息';
+        msg = UI.games_invisible.tr;
       }
       if (msg != null) {
         child = Tooltip(
@@ -280,7 +279,7 @@ class GameCompareView<T extends MainController> extends GetView<T> {
       enableTapToDismiss: false,
       richMessage: TextSpan(children: [
         TextSpan(children: [
-          if (game.exfgls) TextSpan(text: '这款游戏不允许家庭共享\n'),
+          if (game.exfgls) TextSpan(text: '${UI.exfgls.tr}\n'),
           WidgetSpan(
             child: Wrap(
               spacing: 10,
@@ -288,7 +287,7 @@ class GameCompareView<T extends MainController> extends GetView<T> {
               // mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  child: Text('打开'),
+                  child: Text(UI.open.tr),
                   onPressed: () {
                     launchUrlString(
                         'https://store.steampowered.com/app/${game.id}');
@@ -367,7 +366,7 @@ class _Painter extends CustomPainter {
     var pt = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(
-        text: '游戏($gameLength)',
+        text: '${UI.game.tr}($gameLength)',
         style: TextStyle(fontSize: 14, color: color),
       ),
     )..layout();
@@ -381,7 +380,7 @@ class _Painter extends CustomPainter {
     pt = TextPainter(
       textDirection: TextDirection.ltr,
       text: TextSpan(
-        text: '账号($accountLength)',
+        text: '${UI.account.tr}($accountLength)',
         style: TextStyle(fontSize: 14, color: color),
       ),
     )..layout();

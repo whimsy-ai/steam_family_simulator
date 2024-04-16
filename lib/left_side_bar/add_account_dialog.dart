@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oktoast/oktoast.dart';
+import 'package:ui/ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../http.dart';
@@ -11,6 +11,7 @@ class AddAccountDialog extends StatelessWidget {
   final controller = TextEditingController();
   final mine = RxBool(false);
   final loading = RxBool(false);
+  final _formKey = GlobalKey<FormState>();
   static final linkStyle = TextStyle(
     color: Colors.blue,
   );
@@ -52,11 +53,18 @@ class AddAccountDialog extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10),
-          TextField(
-            autofocus: true,
-            controller: controller,
-            decoration: InputDecoration(
-              label: Text('Steam id or Profile Url'),
+          Form(
+            key: _formKey,
+            child: TextFormField(
+              autofocus: true,
+              controller: controller,
+              decoration: InputDecoration(
+                label: Text(UI.input_something.tr),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return UI.input_something.tr;
+                return null;
+              },
             ),
           ),
         ],
@@ -64,12 +72,12 @@ class AddAccountDialog extends StatelessWidget {
       actions: [
         MyChip(
           selected: mine.value,
-          label: '我的账号',
+          label: UI.my_account.tr,
           onChanged: (v) => mine.value = v,
         ),
         TextButton(
           onPressed: () => Get.back(),
-          child: Text('取消'),
+          child: Text(UI.cancel.tr),
         ),
         Obx(
           () => ElevatedButton.icon(
@@ -80,7 +88,7 @@ class AddAccountDialog extends StatelessWidget {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : null,
-            label: Text('Add'),
+            label: Text(UI.add.tr),
             onPressed: loading.value
                 ? null
                 : () async {
@@ -102,8 +110,7 @@ class AddAccountDialog extends StatelessWidget {
   }
 
   Future<String?> _getSteamIdFromUrl(String input) async {
-    if (input.isEmpty) {
-      showToast('请输入内容');
+    if (_formKey.currentState!.validate() == false) {
       return null;
     }
     String? steamId;

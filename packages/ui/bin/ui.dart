@@ -1,6 +1,7 @@
 final zh_CN = {
   's_f_s': 'Steam家庭模拟器',
   'delete': '删除',
+  'confirm_delete': '确认删除 %s ?',
   'ok': 'Ok',
   'cancel': '取消',
   'confirm': '确认',
@@ -15,6 +16,22 @@ final zh_CN = {
   'filter': '过滤器',
   'settings': '设置',
   'proxy': '网络代理',
+  'game': '游戏',
+  'account': '账号',
+  'add': '添加',
+  'add_account': '添加账号',
+  'my_account': '这是我的账号',
+  'support': '支持以下的格式',
+  'input_something': '输入内容',
+  'open': '打开',
+  'search': '搜索',
+  'exfgls': '这个游戏不允许家庭共享',
+  'loading_games': '正在读取游戏信息',
+  'load_error': '网络错误',
+  'games_invisible': '隐藏了游戏信息',
+  'other_applications': '我的其它作品',
+  'success': '成功',
+  'failed': '失败',
 };
 
 final fixed = {

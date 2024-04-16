@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:ui/ui.dart';
 
 import 'change_language_tile.dart';
@@ -50,6 +51,22 @@ class Settings extends GetView<MainController> {
                         Http.init(proxy: v);
                       });
                     },
+                  ),
+                  trailing: SizedBox(
+                    height: kToolbarHeight,
+                    child: TextButton(
+                      child: Text('Test'),
+                      onPressed: () async {
+                        try {
+                          final res =
+                              await Http.dio.get<String>('https://google.com');
+                          // print(res.data!.substring(0, 100));
+                          showToast(UI.success.tr);
+                        } catch (e) {
+                          showToast(UI.failed.tr);
+                        }
+                      },
+                    ),
                   ),
                 ),
               ],

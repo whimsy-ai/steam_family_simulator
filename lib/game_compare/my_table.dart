@@ -8,8 +8,7 @@ class MyTable extends StatefulWidget {
   final Widget Function(BuildContext context, int column)? headerCellBuilder;
   final Widget Function(BuildContext context, int row)? firstColumnBuilder;
   final bool separator;
-  final Widget Function(BuildContext context, double width, double height)?
-      leftTopWidgetBuilder;
+  final Widget Function(BuildContext context)? leftTopWidgetBuilder;
   final double? headerHeight;
   final double? firstColumnWidth;
   final double rowHeight;
@@ -86,11 +85,8 @@ class _MyTableState extends State<MyTable> {
         children: [
           SizedBox(
             width: widget.firstColumnWidth ?? widget.columnWidth,
-            child: widget.leftTopWidgetBuilder?.call(
-              context,
-              widget.columnWidth,
-              height,
-            ),
+            height: height,
+            child: widget.leftTopWidgetBuilder?.call(context),
           ),
           Expanded(
             child: ListView.separated(

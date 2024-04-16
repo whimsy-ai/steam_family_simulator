@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ui/ui.dart';
 
 import '../main_controller.dart';
 import '../steam_profile.dart';
@@ -79,68 +80,6 @@ class SideBar extends GetView<MainController> {
                     itemBuilder: (context, index) {
                       final account = controller.accounts[index];
                       return _account(context, account);
-                      Widget avatar = Image.network(account.avatar);
-                      if (controller.isSelected(account)) {
-                        avatar = Stack(
-                          children: [
-                            avatar,
-                            Positioned.fill(
-                              child: Center(
-                                child: CircleAvatar(
-                                  child: Icon(Icons.check),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                      return controller.sideBarExpand
-                          ? ListTile(
-                              selected: controller.isSelected(account),
-                              selectedTileColor: Theme.of(context).canvasColor,
-                              leading: CircleAvatar(
-                                radius: 20,
-                                child: avatar,
-                              ),
-                              title: Text(account.name),
-                              onTap: () {
-                                controller.select(account);
-                              },
-                            )
-                          : Tooltip(
-                              verticalOffset: 50,
-                              richMessage: TextSpan(
-                                  text: '${account.name}\n',
-                                  children: [
-                                    WidgetSpan(
-                                        child: TextButton(
-                                      onPressed: () async {
-                                        final sure =
-                                            await Get.dialog(AlertDialog(
-                                          title: Text('确认删除 ${account.name}?'),
-                                          actions: [
-                                            ElevatedButton(
-                                              onPressed: () =>
-                                                  Get.back(result: true),
-                                              child: Text('确认'),
-                                            ),
-                                          ],
-                                        ));
-                                        if (sure == true) {
-                                          controller.removeAccount(account);
-                                        }
-                                      },
-                                      child: Text('删除'),
-                                    )),
-                                  ]),
-                              exitDuration: Duration.zero,
-                              child: InkWell(
-                                onTap: () {
-                                  controller.select(account);
-                                },
-                                child: avatar,
-                              ),
-                            );
                     },
                   ),
                 ),
@@ -151,7 +90,12 @@ class SideBar extends GetView<MainController> {
   }
 
   Widget _account(BuildContext context, SteamProfile account) {
-    Widget avatar = Image.network(account.avatar);
+    Widget avatar = ClipOval(
+      child: Image.network(
+        account.avatar,
+        errorBuilder: (_, __, ___) => CircleAvatar(),
+      ),
+    );
     if (controller.isSelected(account)) {
       avatar = Stack(
         children: [
@@ -159,7 +103,12 @@ class SideBar extends GetView<MainController> {
           Positioned.fill(
             child: Center(
               child: CircleAvatar(
-                child: Icon(Icons.check),
+                radius: 16,
+                backgroundColor: Colors.green,
+                child: Icon(
+                  Icons.check,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -169,7 +118,6 @@ class SideBar extends GetView<MainController> {
     Widget widget = controller.sideBarExpand
         ? ListTile(
             selected: controller.isSelected(account),
-            selectedTileColor: Theme.of(context).canvasColor,
             leading: CircleAvatar(
               radius: 20,
               child: avatar,
@@ -187,29 +135,29 @@ class SideBar extends GetView<MainController> {
           );
 
     return Tooltip(
-      richMessage: TextSpan(
-          text: '${account.name}\n',
-          children: [
-            WidgetSpan(
-                child: ElevatedButton(
-              onPressed: () async {
-                final sure = await Get.dialog(AlertDialog(
-                  title: Text('确认删除 ${account.name}?'),
-                  actions: [
-                    ElevatedButton(
-                      onPressed: () => Get.back(result: true),
-                      child: Text('确认'),
-                    ),
-                  ],
-                ));
-                if (sure == true) {
-                  controller.selected.remove(account);
-                  controller.removeAccount(account);
-                }
-              },
-              child: Text('删除'),
-            )),
-          ]),
+      richMessage: TextSpan(text: '${account.name}\n', children: [
+        WidgetSpan(
+            child: ElevatedButton(
+          onPressed: () async {
+            final sure = await Get.dialog(AlertDialog(
+              title: Text(
+                UI.confirm_delete.tr.replaceFirst('%s', account.name),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Get.back(result: true),
+                  child: Text(UI.confirm.tr),
+                ),
+              ],
+            ));
+            if (sure == true) {
+              controller.selected.remove(account);
+              controller.removeAccount(account);
+            }
+          },
+          child: Text(UI.delete.tr),
+        )),
+      ]),
       child: widget,
     );
   }
