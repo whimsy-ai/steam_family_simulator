@@ -11,6 +11,7 @@ import 'data.dart';
 class FastSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print('FastSettings ${Data.locale.languageCode}');
     return Scaffold(
       body: Center(
         child: SizedBox(

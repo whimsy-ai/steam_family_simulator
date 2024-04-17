@@ -84,7 +84,7 @@ class Data {
     Locale locale;
 
     if (localeStr != null && UI.languages.keys.contains(localeStr)) {
-      locale = Locale(localeStr);
+      locale = stringToLocale(localeStr);
     } else {
       locale = Get.deviceLocale!;
     }
@@ -114,4 +114,9 @@ class Data {
       data.keys.map((key) => data![key]!.toString()).toList(),
     );
   }
+}
+
+Locale stringToLocale(String source) {
+  final s = source.split('-');
+  return Locale(s.first, s.elementAtOrNull(1));
 }

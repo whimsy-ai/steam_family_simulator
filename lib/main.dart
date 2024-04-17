@@ -1,7 +1,6 @@
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
@@ -100,10 +99,7 @@ class _MyAppState extends State<MyApp> {
           translations: UI(),
           locale: Get.deviceLocale,
           fallbackLocale: Locale('en'),
-          supportedLocales: UI.languages.keys.map((l) {
-            final s = l.split('-');
-            return Locale(s.first, s.elementAtOrNull(1));
-          }),
+          supportedLocales: UI.languages.keys.map(stringToLocale),
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
