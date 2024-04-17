@@ -25,7 +25,8 @@ class ChangeLanguageTile extends StatelessWidget {
               .toList(),
           onChanged: (v) {
             _lang.value = v!;
-            Data.locale = Locale(v);
+            final s = v.split('-');
+            Data.locale = Locale(s.first, s.elementAtOrNull(1));
             Get.updateLocale(Data.locale);
             updateWindowTitle();
           },

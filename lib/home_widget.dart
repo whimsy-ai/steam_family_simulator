@@ -14,7 +14,7 @@ class FastSettings extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: SizedBox(
-          width: 300,
+          width: 400,
           child: Card(
             clipBehavior: Clip.antiAlias,
             child: Padding(
@@ -33,7 +33,7 @@ class FastSettings extends StatelessWidget {
                       leading: Icon(FontAwesomeIcons.squareSteam),
                       title: Text(UI.find_up.tr),
                       subtitle: Data.locale.languageCode == 'zh'
-                          ? Text('鄙人开发的小游戏')
+                          ? Text('请试试鄙人开发的小游戏')
                           : null,
                       onTap: () async {
                         launchUrlString(
@@ -61,7 +61,8 @@ class FastSettings extends StatelessWidget {
                       launchUrlString('https://ko-fi.com/whimsy_ai');
                     },
                   ),
-                  if (kDebugMode) Text('当前语言 ${Data.locale}'),
+                  if (kDebugMode)
+                    Text('当前语言 ${Get.deviceLocale?.toLanguageTag()}'),
                 ],
               ),
             ),

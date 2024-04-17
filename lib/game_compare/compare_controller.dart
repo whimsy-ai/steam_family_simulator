@@ -29,6 +29,7 @@ mixin GameFilterController on GetxController {
 
   /// 隐藏不允许家庭共享的游戏
   bool _showExfgls = false;
+  int exfgls = 0;
 
   bool get showExfgls => _showExfgls;
 
@@ -146,8 +147,11 @@ mixin GameFilterController on GetxController {
           !value.name.toLowerCase().contains(_search!.toLowerCase()));
     }
 
+    final exfgls = _games.keys.where((key) => _games[key]!.exfgls);
+    this.exfgls = exfgls.length;
+
     if (showExfgls == false) {
-      _games.removeWhere((k, v) => v.exfgls);
+      _games.removeWhere((key, value) => exfgls.contains(key));
     }
   }
 

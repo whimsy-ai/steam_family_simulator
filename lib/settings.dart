@@ -54,8 +54,8 @@ class Settings extends GetView<MainController> {
                   ),
                   trailing: SizedBox(
                     height: kToolbarHeight,
-                    child: TextButton(
-                      child: Text('Test'),
+                    child: ElevatedButton(
+                      child: Text('测试\n可用性'),
                       onPressed: () async {
                         try {
                           final res =

@@ -36,88 +36,91 @@ class GameCompareView<T extends MainController> extends GetView<T> {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(8.0),
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          child: GetBuilder<T>(
-              id: 'content',
-              builder: (c) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            Text(UI.filter.tr),
-                            MyChip(
-                              label: UI.all.tr,
-                              selected: controller.mode == DisplayMode.all,
-                              onChanged: (v) {
-                                controller.mode = DisplayMode.all;
+        child: GetBuilder<T>(
+            id: 'content',
+            builder: (c) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          Text(UI.filter.tr),
+                          MyChip(
+                            label: UI.all.tr,
+                            selected: controller.mode == DisplayMode.all,
+                            onChanged: (v) {
+                              controller.mode = DisplayMode.all;
+                            },
+                          ),
+                          MyChip(
+                              label: UI.no_games.tr,
+                              selected: controller.mode == DisplayMode.notOwn,
+                              onSelect: () {
+                                final mine = controller.selected
+                                    .firstWhereOrNull((acc) => acc.mine);
+                                if (mine == null) {
+                                  showToast(UI.add_mine_account.tr);
+                                }
+                                return mine != null;
                               },
-                            ),
-                            MyChip(
-                                label: UI.no_games.tr,
-                                selected: controller.mode == DisplayMode.notOwn,
-                                onSelect: () {
-                                  final mine = controller.selected
-                                      .firstWhereOrNull((acc) => acc.mine);
-                                  if (mine == null) {
-                                    showToast(UI.add_mine_account.tr);
-                                  }
-                                  return mine != null;
-                                },
+                              onChanged: (v) {
+                                controller.mode =
+                                    controller.mode == DisplayMode.notOwn
+                                        ? DisplayMode.all
+                                        : DisplayMode.notOwn;
+                              }),
+                          Obx(
+                            () => MyChip(
+                                label:
+                                    '${UI.want_games.tr}(${Data.followingGames.length})',
+                                selected:
+                                    controller.mode == DisplayMode.following,
+                                onSelect: () => true,
                                 onChanged: (v) {
-                                  controller.mode =
-                                      controller.mode == DisplayMode.notOwn
-                                          ? DisplayMode.all
-                                          : DisplayMode.notOwn;
+                                  controller.mode = DisplayMode.following;
                                 }),
-                            Obx(
-                              () => MyChip(
-                                  label:
-                                      '${UI.want_games.tr}(${Data.followingGames.length})',
-                                  selected:
-                                      controller.mode == DisplayMode.following,
-                                  onSelect: () => true,
-                                  onChanged: (v) {
-                                    controller.mode = DisplayMode.following;
-                                  }),
-                            ),
-                            SizedBox(
-                              width: 300,
-                              height: kToolbarHeight,
-                              child: TextFormField(
-                                initialValue: controller.search,
-                                onChanged: (v) => controller.search = v,
-                                decoration: InputDecoration(
-                                  alignLabelWithHint: true,
-                                  floatingLabelAlignment:
-                                      FloatingLabelAlignment.start,
-                                  prefixIcon: Icon(Icons.search, size: 14),
-                                  hintText: UI.input_something.tr,
-                                  label: Text(UI.search.tr),
-                                  contentPadding: EdgeInsets.zero,
-                                  border: OutlineInputBorder(),
-                                ),
+                          ),
+                          SizedBox(
+                            width: 300,
+                            height: kToolbarHeight,
+                            child: TextFormField(
+                              initialValue: controller.search,
+                              onChanged: (v) => controller.search = v,
+                              decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                floatingLabelAlignment:
+                                    FloatingLabelAlignment.start,
+                                prefixIcon: Icon(Icons.search, size: 14),
+                                hintText: UI.input_something.tr,
+                                label: Text(UI.search.tr),
+                                contentPadding: EdgeInsets.zero,
+                                border: OutlineInputBorder(),
                               ),
                             ),
-                            MyChip(
-                              label: UI.show_exfgls.tr,
-                              selected: controller.showExfgls,
-                              onChanged: (v) {
-                                controller.showExfgls = v;
-                              },
-                            ),
-                          ],
-                        ),
+                          ),
+                          MyChip(
+                            label:
+                                '${UI.show_exfgls.tr}(${controller.exfgls})',
+                            selected: controller.showExfgls,
+                            onChanged: (v) {
+                              controller.showExfgls = v;
+                            },
+                          ),
+                        ],
                       ),
-                      Expanded(child: _table(context)),
-                    ],
-                  )),
-        ),
+                    ),
+                    Expanded(
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: _table(context),
+                      ),
+                    ),
+                  ],
+                )),
       ),
       floatingActionButton: Obx(
         () => AnimatedOpacity(

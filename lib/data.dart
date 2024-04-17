@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:get/get_rx/get_rx.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ui/ui.dart';
 
@@ -80,13 +80,16 @@ class Data {
   static late final RxMap<String, SteamGame> followingGames;
 
   static Locale get locale {
-    final locale = _core.getString(_localeKey);
-    // print('语言 $locale');
+    final localeStr = _core.getString(_localeKey);
+    Locale locale;
 
-    if (locale != null && UI.languages.keys.contains(locale)) {
-      return Locale(locale);
+    if (localeStr != null && UI.languages.keys.contains(localeStr)) {
+      locale = Locale(localeStr);
+    } else {
+      locale = Get.deviceLocale!;
     }
-    return PlatformDispatcher.instance.locale;
+    print('Data locale: ${locale.toLanguageTag()}');
+    return locale;
   }
 
   static set locale(Locale locale) => _core.setString(
