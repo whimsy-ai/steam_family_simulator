@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:ui/ui.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -23,7 +24,7 @@ class AddAccountDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('添加账号'),
+      title: Text(UI.add_account.tr),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +33,7 @@ class AddAccountDialog extends StatelessWidget {
             direction: Axis.vertical,
             spacing: 6,
             children: [
-              Text('支持以下格式：'),
+              Text(UI.support.tr),
               Text('76561197999689957'),
               InkWell(
                 onTap: () {
@@ -100,7 +101,9 @@ class AddAccountDialog extends StatelessWidget {
                         acc?.mine = mine.value;
                         Get.back(result: acc);
                       }
-                    } catch (e) {}
+                    } catch (e) {
+                      showToast(UI.invalid_content.tr);
+                    }
                     loading.value = false;
                   },
           ),

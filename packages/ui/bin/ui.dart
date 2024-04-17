@@ -7,6 +7,7 @@ final zh_CN = {
   'confirm': '确认',
   'feed': '欢迎投喂',
   'no_games': '我没有的游戏',
+  'invalid_content': '无法加载到有效内容',
   'show_exfgls': '显示不能共享的游戏',
   'want_games': '想要的游戏',
   'find_up': '找起来！',
