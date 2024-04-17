@@ -6,10 +6,10 @@ import 'steam_game.dart';
 
 class SteamProfile {
   final String id;
-  final String name;
-  final String avatar;
-  final String profileUrl;
   final games = <String, SteamGame>{};
+  String name;
+  String avatar;
+  String profileUrl;
   bool mine;
   bool loadingInfo = false;
   bool loadingGames = false;

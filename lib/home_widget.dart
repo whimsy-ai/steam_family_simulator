@@ -8,10 +8,10 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'change_language_tile.dart';
 import 'data.dart';
 
-class FastSettings extends StatelessWidget {
+class HomeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print('FastSettings ${Data.locale.languageCode}');
+    print('FastSettings ${Data.locale.toLanguageTag()}');
     return Scaffold(
       body: Center(
         child: SizedBox(
@@ -45,7 +45,7 @@ class FastSettings extends StatelessWidget {
                   ListTile(
                     title: Text(UI.feed.tr),
                   ),
-                  if (kDebugMode || Data.locale.languageCode == 'zh')
+                  if (Data.locale.languageCode == 'zh')
                     ListTile(
                       leading: Icon(
                         FontAwesomeIcons.boltLightning,
@@ -63,7 +63,7 @@ class FastSettings extends StatelessWidget {
                     },
                   ),
                   if (kDebugMode)
-                    Text('当前语言 ${Get.deviceLocale?.toLanguageTag()}'),
+                    Text('当前语言 ${Data.locale.toLanguageTag()}'),
                 ],
               ),
             ),

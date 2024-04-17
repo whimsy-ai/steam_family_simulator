@@ -55,7 +55,7 @@ class Settings extends GetView<MainController> {
                   trailing: SizedBox(
                     height: kToolbarHeight,
                     child: ElevatedButton(
-                      child: Text('测试\n可用性'),
+                      child: Text(UI.test_proxy.tr),
                       onPressed: () async {
                         try {
                           final res =
@@ -68,6 +68,13 @@ class Settings extends GetView<MainController> {
                       },
                     ),
                   ),
+                ),
+                ListTile(
+                  title: Text(UI.reload_accounts.tr),
+                  onTap: () async {
+                    controller.refreshAccounts();
+                    showToast(UI.success.tr);
+                  },
                 ),
               ],
             ),

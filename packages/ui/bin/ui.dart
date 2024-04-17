@@ -1,4 +1,4 @@
-final zh_CN = {
+final zh = {
   's_f_s': 'Steam家庭模拟器',
   'delete': '删除',
   'confirm_delete': '确认删除 %s ?',
@@ -33,6 +33,8 @@ final zh_CN = {
   'other_applications': '我的其它作品',
   'success': '成功',
   'failed': '失败',
+  'reload_accounts': '更新所有账号的信息',
+  'test_proxy': '测试代理的可用性',
 };
 
 final fixed = {

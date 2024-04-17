@@ -168,7 +168,7 @@ void main(List<String> args) async {
   final queue = Queue(parallel: 20);
 
   /// 制作静态变量
-  final keys = zh_CN.keys;
+  final keys = zh.keys;
   for (var key in keys) {
     text.writeln('  static const ${key.replaceAll(' ', '')} = \'$key\';');
   }
@@ -203,14 +203,14 @@ void main(List<String> args) async {
   print('完成 翻译语言名词');
 
   int failedCount = 0;
-  final languages = {'zh-CN': zh_CN};
+  final languages = {'zh-CN': zh};
   for (var targetLanguage in rankedLanguages.keys) {
     if (targetLanguage.toLowerCase() == 'zh-cn') continue;
     final data = <String, String>{};
     languages[targetLanguage] = data;
     print('targetLanguage $targetLanguage, ${targetLanguage.contains('zh')}');
-    for (var key in zh_CN.keys) {
-      final rawText = zh_CN[key]!;
+    for (var key in zh.keys) {
+      final rawText = zh[key]!;
       queue.add(() async {
         if (targetLanguage.contains('zh') == false) {
           if (key == 'find_up') {
@@ -261,8 +261,15 @@ void main(List<String> args) async {
   await queue.whenComplete();
   print('翻译失败次数 $failedCount');
   await writeCaches();
+  languages.keys.toList().forEach((key) {
+    if(key.contains('-')){
+      final copy = languages[key]!;
+      languages.remove(key);
+      languages[key.replaceAll('-', '_')] = copy;
+    }
+  });
   text
-    ..writeln('@override')
+    ..writeln('  @override')
     ..writeln(
         '  Map<String, Map<String, String>> get keys => ${JsonEncoder.withIndent('  ').convert(languages)};')
     ..writeln('}');
@@ -272,7 +279,7 @@ void main(List<String> args) async {
   try {
     final csvConverter = ListToCsvConverter();
     final csvData = <List<String>>[];
-    final keyIndex = zh_CN.keys.toList();
+    final keyIndex = zh.keys.toList();
     csvData.add(['key']);
     languages.forEach((language, value) {
       csvData.first.add(language);

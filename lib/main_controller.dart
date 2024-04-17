@@ -1,7 +1,9 @@
+import 'package:dynamic_parallel_queue/dynamic_parallel_queue.dart';
 import 'package:get/get.dart';
 
-import 'game_compare/compare_controller.dart';
 import 'data.dart';
+import 'game_compare/compare_controller.dart';
+import 'http.dart';
 import 'steam_profile.dart';
 
 enum Layout {
@@ -71,4 +73,18 @@ class MainController extends GetxController with GameFilterController {
       return a1.compareTo(b1);
     });
   }
+
+  final _queue = Queue(parallel: 2);
+
+  Future<dynamic> refreshAccounts() => _queue
+          .addAll(_accounts.map((acc) => () async {
+                final newAcc = await Http.loadProfile(acc.id);
+                if (newAcc == null) return;
+                acc.name = newAcc.name;
+                acc.avatar = newAcc.avatar;
+                acc.profileUrl = newAcc.profileUrl;
+              }))
+          .then((v) {
+        update(['sideBar', 'content']);
+      });
 }

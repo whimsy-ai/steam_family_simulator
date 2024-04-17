@@ -26,6 +26,7 @@ PackageInfo? packageInfo;
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  packageInfo ??= await PackageInfo.fromPlatform();
   print('缓存目录 ${(await getApplicationCacheDirectory()).path}');
   print('数据目录 ${(await getApplicationSupportDirectory()).path}');
   await Data.init();
@@ -48,10 +49,8 @@ void main(List<String> args) async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
-    await Get.updateLocale(Data.locale);
     updateWindowTitle();
   });
-  packageInfo ??= await PackageInfo.fromPlatform();
   runApp(MyApp());
 }
 
@@ -87,6 +86,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Get.updateLocale(Data.locale);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
       return OKToast(
@@ -97,9 +103,8 @@ class _MyAppState extends State<MyApp> {
             GlobalCupertinoLocalizations.delegate,
           ],
           translations: UI(),
-          locale: Get.deviceLocale,
+          locale: Data.locale,
           fallbackLocale: Locale('en'),
-          supportedLocales: UI.languages.keys.map(stringToLocale),
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
@@ -125,7 +130,8 @@ class _MyAppState extends State<MyApp> {
               name: '/main',
               page: () => MyHomePage(),
               binding: BindingsBuilder(() {
-                Get.put(MainController(onThemeChange: _themeChange));
+                Get.put(MainController(onThemeChange: _themeChange)
+                  ..refreshAccounts());
               }),
             ),
           ],
@@ -163,7 +169,7 @@ class MyHomePage extends StatelessWidget {
                         return GetPageRoute(
                           settings: settings,
                           transitionDuration: Duration.zero,
-                          page: () => FastSettings(),
+                          page: () => HomeWidget(),
                         );
                       } else if (settings.name == '/content') {
                         return GetPageRoute(

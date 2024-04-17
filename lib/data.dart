@@ -118,5 +118,6 @@ class Data {
 
 Locale stringToLocale(String source) {
   final s = source.split('-');
+  print('stringToLocale $s');
   return Locale(s.first, s.elementAtOrNull(1));
 }
