@@ -147,11 +147,13 @@ mixin GameFilterController on GetxController {
           !value.name.toLowerCase().contains(_search!.toLowerCase()));
     }
 
-    final exfgls = _games.keys.where((key) => _games[key]!.exfgls);
+    final exfgls = _games.keys.where((key) => _games[key]!.exfgls).toSet();
     this.exfgls = exfgls.length;
 
     if (showExfgls == false) {
-      _games.removeWhere((key, value) => exfgls.contains(key));
+      for (var k in exfgls) {
+        _games.remove(k);
+      }
     }
   }
 
